@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto de probabilidad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========================================= */
+        /* TEMA NEÓN (POR DEFECTO)                   */
+        /* ========================================= */
+        body { background-color: #0a0a0a; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s; }
+        h1 { color: #0ff; text-shadow: 0 0 5px #0ff, 0 0 10px #0ff; font-weight: bold; text-transform: uppercase; }
+        
+        .navbar { border-bottom: 2px solid #f0f; box-shadow: 0 0 15px #f0f; background-color: #111 !important; transition: all 0.3s; }
+        .navbar-brand { color: #f0f !important; text-shadow: 0 0 5px #f0f; font-weight: bold; }
+
+        .card { background-color: rgba(15, 15, 15, 0.9); border: 1px solid #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); margin-bottom: 20px; transition: all 0.3s; }
+        .card-header { background-color: rgba(0, 255, 255, 0.1); color: #0ff; border-bottom: 1px solid #0ff; font-weight: bold; text-transform: uppercase; text-shadow: 0 0 5px #0ff; }
+        
+        /* Efecto Magenta para ciertas tarjetas en el tema Neón */
+        .card.border-magenta { border-color: #f0f; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); }
+        .card.border-magenta .card-header { background-color: rgba(255, 0, 255, 0.1); color: #f0f; border-bottom: 1px solid #f0f; text-shadow: 0 0 5px #f0f; }
+
+        .form-control { background-color: #1a1a1a; color: #fff; border: 1px solid #0ff; transition: all 0.3s; }
+        .form-control:focus { background-color: #222; color: #0ff; border-color: #f0f; box-shadow: 0 0 10px #f0f; }
+        
+        .btn-neon-cyan { background: transparent; color: #0ff; border: 1px solid #0ff; box-shadow: 0 0 5px #0ff; }
+        .btn-neon-cyan:hover { background: #0ff; color: #000; box-shadow: 0 0 15px #0ff; }
+        .btn-neon-magenta { background: transparent; color: #f0f; border: 1px solid #f0f; box-shadow: 0 0 5px #f0f; }
+        .btn-neon-magenta:hover { background: #f0f; color: #000; box-shadow: 0 0 15px #f0f; }
+
+        .resultado-destacado { color: #ccff00; text-shadow: 0 0 8px #ccff00; font-weight: bold; font-size: 1.3rem; transition: color 0.3s; }
+        .caja-resultado { background-color: #000; border: 1px solid #ccff00; padding: 15px; border-radius: 8px; box-shadow: 0 0 10px rgba(204, 255, 0, 0.2); transition: all 0.3s; }
+
+        table { color: #fff !important; border-color: #0ff !important; transition: all 0.3s; }
+        th { background-color: rgba(0, 255, 255, 0.15) !important; color: #0ff !important; text-shadow: 0 0 3px #0ff; }
+        td { border-color: rgba(0, 255, 255, 0.3) !important; }
+
+        .seccion { display: none; animation: fadeIn 0.4s; }
+        .seccion.activa { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Estilos del Menú Lateral (Neon por defecto) */
+        .offcanvas { background-color: #111; color: #fff; border-left: 2px solid #f0f; box-shadow: 0 0 20px #f0f; }
+        .offcanvas-header { border-bottom: 1px solid #f0f; }
+        .nav-btn { color: #fff; border: 1px solid #0ff; margin-bottom: 8px; transition: 0.3s; background: transparent; }
+        .nav-btn:hover, .nav-btn.active { background-color: #0ff; color: #000; box-shadow: 0 0 10px #0ff; }
+        .btn-close-neon { filter: invert(1); opacity: 1; text-shadow: 0 0 5px #fff; }
+
+        /* ========================================= */
+        /* MODO CLARO (BLANCO)                       */
+        /* ========================================= */
+        body.theme-light { background-color: #f8f9fa; color: #212529; }
+        body.theme-light h1 { color: #0d6efd; text-shadow: none; }
+        body.theme-light .navbar { background-color: #ffffff !important; border-bottom: 1px solid #dee2e6; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body.theme-light .navbar-brand { color: #0d6efd !important; text-shadow: none; }
+        
+        body.theme-light .card { background-color: #ffffff; border: 1px solid #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        body.theme-light .card-header { background-color: #e9ecef; color: #212529; border-bottom: 1px solid #dee2e6; text-shadow: none; }
+        
+        /* CORRECCIÓN: Sobrescribir el estilo magenta en el tema claro */
+        body.theme-light .card.border-magenta { border-color: #dee2e6; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        body.theme-light .card.border-magenta .card-header { background-color: #e9ecef; color: #212529; border-bottom: 1px solid #dee2e6; text-shadow: none; }
+
+        body.theme-light .form-control { background-color: #ffffff; color: #212529; border: 1px solid #ced4da; }
+        body.theme-light .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25); border-color: #86b7fe; }
+        
+        body.theme-light .btn-neon-cyan { background-color: #0d6efd; color: #fff; border: none; box-shadow: none; }
+        body.theme-light .btn-neon-cyan:hover { background-color: #0b5ed7; }
+        body.theme-light .btn-neon-magenta { background-color: #198754; color: #fff; border: none; box-shadow: none; }
+        body.theme-light .btn-neon-magenta:hover { background-color: #157347; }
+        
+        body.theme-light .caja-resultado { background-color: #f8f9fa; border: 1px solid #dee2e6; box-shadow: none; }
+        body.theme-light .resultado-destacado { color: #0d6efd; text-shadow: none; }
+        
+        body.theme-light table, body.theme-light th, body.theme-light td { border-color: #dee2e6 !important; color: #212529 !important; }
+        body.theme-light th { background-color: #e9ecef !important; text-shadow: none; }
+        body.theme-light .text-white { color: #212529 !important; }
+        body.theme-light .text-info { color: #0d6efd !important; }
+        body.theme-light .text-warning { color: #fd7e14 !important; }
+        body.theme-light .text-success { color: #198754 !important; }
+
+        /* Offcanvas Claro */
+        body.theme-light .offcanvas { background-color: #ffffff; color: #212529; border-left: 1px solid #dee2e6; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        body.theme-light .offcanvas-header { border-bottom: 1px solid #dee2e6; }
+        body.theme-light .nav-btn { color: #212529; border-color: #dee2e6; background: #f8f9fa; }
+        body.theme-light .nav-btn:hover, body.theme-light .nav-btn.active { background-color: #0d6efd; color: #fff; border-color: #0d6efd; box-shadow: none; }
+        body.theme-light .btn-close-neon { filter: invert(0); }
+
+        /* ========================================= */
+        /* MODO OSCURO (SIMPLE)                      */
+        /* ========================================= */
+        body.theme-dark { background-color: #212529; color: #f8f9fa; }
+        body.theme-dark h1 { color: #f8f9fa; text-shadow: none; }
+        body.theme-dark .navbar { border-bottom: 1px solid #343a40; box-shadow: none; background-color: #212529 !important; }
+        body.theme-dark .navbar-brand { color: #f8f9fa !important; text-shadow: none; }
+        
+        body.theme-dark .card { background-color: #343a40; border: 1px solid #495057; box-shadow: none; }
+        body.theme-dark .card-header { background-color: #2c3034; color: #fff; border-bottom: 1px solid #495057; text-shadow: none; }
+        
+        /* CORRECCIÓN: Sobrescribir el estilo magenta en el tema oscuro */
+        body.theme-dark .card.border-magenta { border-color: #495057; box-shadow: none; }
+        body.theme-dark .card.border-magenta .card-header { background-color: #2c3034; color: #fff; border-bottom: 1px solid #495057; text-shadow: none; }
+
+        body.theme-dark .form-control { background-color: #495057; color: #fff; border: 1px solid #6c757d; }
+        body.theme-dark .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(255,255,255,.25); border-color: #adb5bd; }
+        
+        body.theme-dark .btn-neon-cyan { background-color: #0dcaf0; color: #000; border: none; box-shadow: none; }
+        body.theme-dark .btn-neon-cyan:hover { background-color: #31d2f2; }
+        body.theme-dark .btn-neon-magenta { background-color: #d63384; color: #fff; border: none; box-shadow: none; }
+        body.theme-dark .btn-neon-magenta:hover { background-color: #a62667; }
+        
+        body.theme-dark .caja-resultado { background-color: #2c3034; border: 1px solid #495057; box-shadow: none; }
+        body.theme-dark .resultado-destacado { color: #20c997; text-shadow: none; }
+        
+        body.theme-dark table, body.theme-dark th, body.theme-dark td { border-color: #495057 !important; color: #f8f9fa !important; }
+        body.theme-dark th { background-color: #2c3034 !important; text-shadow: none; }
+
+        /* Offcanvas Oscuro */
+        body.theme-dark .offcanvas { background-color: #2c3034; color: #f8f9fa; border-left: 1px solid #495057; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        body.theme-dark .offcanvas-header { border-bottom: 1px solid #495057; }
+        body.theme-dark .nav-btn { color: #f8f9fa; border-color: #495057; background: #343a40; }
+        body.theme-dark .nav-btn:hover, body.theme-dark .nav-btn.active { background-color: #0dcaf0; color: #000; border-color: #0dcaf0; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-4 py-3">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a class="navbar-brand m-0" href="#">📊 STAT-PROJECT</a>
+        
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" style="color: inherit; border-color: inherit;">
+                    🎨 Tema
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item fw-bold text-info" href="#" onclick="cambiarTema('neon')">⚡ Modo Neón</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="cambiarTema('light')">☀️ Modo Blanco</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="cambiarTema('dark')">🌙 Modo Negro</a></li>
+                </ul>
+            </div>
+            
+            <button class="btn btn-primary fw-bold" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuSecciones" aria-controls="menuSecciones" style="background-color: #0d6efd; border: none; color: white;">
+                ☰ Funciones
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="menuSecciones" aria-labelledby="menuSeccionesLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold" id="menuSeccionesLabel">Secciones</h5>
+        <button type="button" class="btn-close btn-close-neon" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="d-flex flex-column">
+            <button class="btn nav-btn text-start active" id="nav-sec-datos" onclick="mostrarSeccion('sec-datos')" data-bs-dismiss="offcanvas">1. Datos</button>
+            <button class="btn nav-btn text-start" id="nav-sec-estadistica" onclick="mostrarSeccion('sec-estadistica')" data-bs-dismiss="offcanvas">2. Estadística</button>
+            <button class="btn nav-btn text-start" id="nav-sec-graficos" onclick="mostrarSeccion('sec-graficos')" data-bs-dismiss="offcanvas">3. Gráficos</button>
+            <button class="btn nav-btn text-start" id="nav-sec-conjuntos" onclick="mostrarSeccion('sec-conjuntos')" data-bs-dismiss="offcanvas">4. Conjuntos/Comb</button>
+            <button class="btn nav-btn text-start" id="nav-sec-probabilidad" onclick="mostrarSeccion('sec-probabilidad')" data-bs-dismiss="offcanvas">5. Probabilidad</button>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <h1 class="text-center mb-5">Proyecto de probabilidad</h1>
+
+    <div id="sec-datos" class="seccion activa">
+        <div class="card">
+            <div class="card-header">1. Ingreso de Datos (Mínimo 20)</div>
+            <div class="card-body">
+                <p>Escribe tus datos manualmente separados por comas o genera exactamente 20 números al azar.</p>
+                <textarea id="dataInput" class="form-control mb-4" rows="4" placeholder="Ejemplo: 12, 45, 8, 33, 19..."></textarea>
+                <div class="d-flex gap-3">
+                    <button class="btn btn-neon-cyan w-50" onclick="generarAleatorios()">🎲 Generar 20 Aleatorios</button>
+                    <button class="btn btn-neon-magenta w-50" onclick="procesarDatos()">⚙️ Procesar Datos</button>
+                </div>
+                <div id="mensajeAlerta" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-estadistica" class="seccion">
+        <div class="card border-magenta mb-4">
+            <div class="card-header">2. Medidas de Tendencia Central y Dispersión</div>
+            <div class="card-body">
+                <div class="row text-center caja-resultado">
+                    <div class="col-md-2 mb-3 mb-md-0"><h6>Total (n)</h6><span class="resultado-destacado" id="valN">0</span></div>
+                    <div class="col-md-2 mb-3 mb-md-0"><h6>Media</h6><span class="resultado-destacado" id="valMedia">0</span></div>
+                    <div class="col-md-2 mb-3 mb-md-0"><h6>Mediana</h6><span class="resultado-destacado" id="valMediana">0</span></div>
+                    <div class="col-md-2 mb-3 mb-md-0"><h6>Moda</h6><span class="resultado-destacado" id="valModa">0</span></div>
+                    <div class="col-md-2 mb-3 mb-md-0"><h6>Mín / Máx</h6><span class="resultado-destacado" id="valMinMax">0/0</span></div>
+                    <div class="col-md-2"><h6>Rango</h6><span class="resultado-destacado" id="valRango">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Tabla de Frecuencias</div>
+            <div class="card-body table-responsive">
+                <table class="table table-bordered text-center align-middle">
+                    <thead>
+                        <tr>
+                            <th>Clase (Intervalo)</th>
+                            <th>Marca de Clase (x)</th>
+                            <th>Frec. Absoluta (fi)</th>
+                            <th>Frec. Relativa (fr)</th>
+                            <th>Abs. Acumulada (Fi)</th>
+                            <th>Rel. Acumulada (Fr)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaFrecuencias">
+                        <tr><td colspan="6" class="text-muted">Ingresa datos primero.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-graficos" class="seccion">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Histograma y Polígono</div>
+                    <div class="card-body"><canvas id="histogramaCanvas"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-magenta">
+                    <div class="card-header">Ojiva</div>
+                    <div class="card-body"><canvas id="ojivaCanvas"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header">Diagrama de Pareto</div>
+                    <div class="card-body"><canvas id="paretoCanvas"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-conjuntos" class="seccion">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-magenta">
+                    <div class="card-header">4. Operaciones con Conjuntos</div>
+                    <div class="card-body">
+                        <label class="text-info fw-bold">Conjunto A (separado por comas):</label>
+                        <input type="text" id="conjuntoA" class="form-control mb-3" placeholder="Ej: 1, 2, 3">
+                        <label class="text-info fw-bold">Conjunto B (separado por comas):</label>
+                        <input type="text" id="conjuntoB" class="form-control mb-4" placeholder="Ej: 3, 4, 5">
+                        <button class="btn btn-neon-magenta w-100 mb-4" onclick="operarConjuntos()">Calcular Conjuntos</button>
+                        
+                        <div class="caja-resultado">
+                            <p class="mb-2 text-white"><strong>A ∪ B (Unión):</strong> <span class="resultado-destacado float-end" id="unionRes">...</span></p>
+                            <p class="mb-0 text-white"><strong>A ∩ B (Intersección):</strong> <span class="resultado-destacado float-end" id="interRes">...</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">Permutaciones y Combinaciones</div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <label class="text-info fw-bold">Total (n):</label>
+                                <input type="number" id="val_n" class="form-control" placeholder="n">
+                            </div>
+                            <div class="col-6">
+                                <label class="text-info fw-bold">Muestra (r):</label>
+                                <input type="number" id="val_r" class="form-control" placeholder="r">
+                            </div>
+                        </div>
+                        <button class="btn btn-neon-cyan w-100 mb-4" onclick="calcularCombinatoria()">Calcular nPr y nCr</button>
+                        
+                        <div class="caja-resultado">
+                            <p class="mb-2 text-white"><strong>Permutaciones (nPr):</strong> <span class="resultado-destacado float-end" id="resPerm">0</span></p>
+                            <p class="mb-0 text-white"><strong>Combinaciones (nCr):</strong> <span class="resultado-destacado float-end" id="resComb">0</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-probabilidad" class="seccion">
+        <div class="card border-magenta">
+            <div class="card-header">5. Probabilidad: Regla Multiplicativa y Árbol</div>
+            <div class="card-body">
+                <p class="text-muted">Dos eventos independientes. Ingresa la probabilidad de éxito.</p>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="text-info fw-bold mb-2">Probabilidad de Éxito P(E) [0 a 1]:</label>
+                        <input type="number" id="probExito" class="form-control form-control-lg mb-3" step="0.01" min="0" max="1" placeholder="Ej: 0.6">
+                        <button class="btn btn-neon-magenta w-100" onclick="calcularArbol()">Generar Árbol</button>
+                    </div>
+                    <div class="col-md-8 mt-3 mt-md-0">
+                        <div class="caja-resultado">
+                            <p class="text-white mb-2 border-bottom border-secondary pb-2">P(Fracaso) = 1 - P(E) <span class="resultado-destacado float-end text-info" id="resPF">0</span></p>
+                            <p class="text-white mb-1">P(Éxito y Éxito) = P(E) × P(E) <span class="resultado-destacado float-end" id="resEE">0</span></p>
+                            <p class="text-white mb-1">P(Éxito y Fracaso) = P(E) × P(F) <span class="resultado-destacado float-end text-warning" id="resEF">0</span></p>
+                            <p class="text-white mb-1">P(Fracaso y Éxito) = P(F) × P(E) <span class="resultado-destacado float-end text-warning" id="resFE">0</span></p>
+                            <p class="text-white mb-0">P(Fracaso y Fracaso) = P(F) × P(F) <span class="resultado-destacado float-end text-danger" id="resFF">0</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="text-center text-info mt-5 mb-3">Diagrama de Árbol</h5>
+                <div class="text-center overflow-auto">
+                    <canvas id="arbolCanvas" width="700" height="350" style="border: 1px dashed #ccc; border-radius: 8px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // --- GESTIÓN DE TEMAS ---
+    let temaActual = 'neon';
+
+    function cambiarTema(nuevoTema) {
+        temaActual = nuevoTema;
+        
+        if (nuevoTema === 'neon') {
+            document.body.className = '';
+            Chart.defaults.color = '#fff';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        } else if (nuevoTema === 'light') {
+            document.body.className = 'theme-light';
+            Chart.defaults.color = '#212529';
+            Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.1)';
+        } else if (nuevoTema === 'dark') {
+            document.body.className = 'theme-dark';
+            Chart.defaults.color = '#f8f9fa';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        }
+
+        // Redibujar gráficos si ya hay datos procesados
+        if (document.getElementById('dataInput').value.trim() !== '') procesarDatos(true); 
+        if (document.getElementById('probExito').value.trim() !== '') calcularArbol();
+    }
+
+    // --- NAVEGACIÓN DESDE EL MENÚ LATERAL ---
+    function mostrarSeccion(idSeccion) {
+        document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('activa'));
+        document.getElementById(idSeccion).classList.add('activa');
+        
+        // Actualizar el botón activo en el menú lateral
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('nav-' + idSeccion).classList.add('active');
+    }
+
+    let chartHistograma, chartOjiva, chartPareto;
+
+    // --- SECCIÓN 1 Y 2: DATOS Y ESTADÍSTICA ---
+    function generarAleatorios() {
+        let arr = [];
+        for(let i=0; i<20; i++) arr.push(Math.floor(Math.random() * 100) + 1);
+        document.getElementById('dataInput').value = arr.join(', ');
+    }
+
+    function procesarDatos(silencioso = false) {
+        let input = document.getElementById('dataInput').value;
+        let arr = input.split(',').map(item => parseFloat(item.trim())).filter(n => !isNaN(n));
+        let alertBox = document.getElementById('mensajeAlerta');
+        
+        if(arr.length < 20) {
+            alertBox.innerHTML = `<div class="alert bg-danger text-white">⚠️ Error: Ingresa al menos 20 números. Tienes ${arr.length}.</div>`;
+            return;
+        }
+        
+        if(!silencioso) {
+            alertBox.innerHTML = '<div class="alert alert-success fw-bold text-dark" style="background-color: #0f0;">✔️ ¡Datos procesados! Abre el menú de Funciones para revisar las gráficas.</div>';
+        }
+        arr.sort((a, b) => a - b); 
+        calcularEstadisticas(arr);
+    }
+
+    function calcularEstadisticas(datos) {
+        let n = datos.length;
+        let suma = datos.reduce((a, b) => a + b, 0);
+        let media = suma / n;
+        let mediana = n % 2 === 0 ? (datos[n/2 - 1] + datos[n/2]) / 2 : datos[Math.floor(n/2)];
+        
+        let freqMap = {};
+        datos.forEach(num => freqMap[num] = (freqMap[num] || 0) + 1);
+        let maxFreq = Math.max(...Object.values(freqMap));
+        let moda = Object.keys(freqMap).filter(k => freqMap[k] === maxFreq).join(', ');
+
+        let min = datos[0];
+        let max = datos[n - 1];
+        let rango = max - min;
+
+        document.getElementById('valN').innerText = n;
+        document.getElementById('valMedia').innerText = media.toFixed(2);
+        document.getElementById('valMediana').innerText = mediana;
+        document.getElementById('valModa').innerText = moda;
+        document.getElementById('valMinMax').innerText = `${min} / ${max}`;
+        document.getElementById('valRango').innerText = rango.toFixed(2);
+
+        crearTablaFrecuencias(datos, min, max, rango, n);
+    }
+
+    function crearTablaFrecuencias(datos, min, max, rango, n) {
+        let k = Math.round(1 + 3.322 * Math.log10(n)); 
+        let amplitud = Math.ceil(rango / k);
+        if(amplitud === 0) amplitud = 1; 
+        
+        let tbody = document.getElementById('tablaFrecuencias');
+        tbody.innerHTML = '';
+
+        let limiteInf = min, Fi = 0;
+        let etiquetasClase = [], fiArray = [], FiArray = [];
+
+        for(let i = 0; i < k; i++) {
+            let limiteSup = limiteInf + amplitud;
+            let fi = datos.filter(x => x >= limiteInf && (i === k-1 ? x <= limiteSup : x < limiteSup)).length;
+            let fr = fi / n;
+            Fi += fi;
+            let Fr = Fi / n;
+            let marca = (limiteInf + limiteSup) / 2;
+
+            tbody.innerHTML += `<tr>
+                <td>[${limiteInf} - ${limiteSup})</td>
+                <td class="text-info">${marca.toFixed(2)}</td>
+                <td class="text-warning fw-bold">${fi}</td>
+                <td>${fr.toFixed(2)}</td>
+                <td class="text-success fw-bold">${Fi}</td>
+                <td>${Fr.toFixed(2)}</td>
+            </tr>`;
+
+            etiquetasClase.push(`[${limiteInf} - ${limiteSup})`);
+            fiArray.push(fi);
+            FiArray.push(Fi);
+            limiteInf = limiteSup;
+        }
+        dibujarGraficos(etiquetasClase, fiArray, FiArray);
+    }
+
+    // --- SECCIÓN 3: GRÁFICOS DINÁMICOS ---
+    function dibujarGraficos(etiquetas, fiArray, FiArray) {
+        if(chartHistograma) chartHistograma.destroy();
+        if(chartOjiva) chartOjiva.destroy();
+        if(chartPareto) chartPareto.destroy();
+
+        // Asignar colores según el tema
+        let cHistBg, cHistBorder, cPoligono, cOjiva, cOjivaBg, cParetoBar, cParetoLine;
+        
+        if (temaActual === 'neon') {
+            cHistBg = 'rgba(0, 255, 255, 0.5)'; cHistBorder = '#0ff'; cPoligono = '#f0f';
+            cOjiva = '#0f0'; cOjivaBg = 'rgba(0, 255, 0, 0.1)'; cParetoBar = 'rgba(255, 165, 0, 0.6)'; cParetoLine = '#0ff';
+        } else if (temaActual === 'light') {
+            cHistBg = 'rgba(13, 110, 253, 0.6)'; cHistBorder = '#0d6efd'; cPoligono = '#dc3545';
+            cOjiva = '#198754'; cOjivaBg = 'rgba(25, 135, 84, 0.2)'; cParetoBar = 'rgba(253, 126, 20, 0.6)'; cParetoLine = '#6f42c1';
+        } else { 
+            cHistBg = 'rgba(13, 202, 240, 0.5)'; cHistBorder = '#0dcaf0'; cPoligono = '#d63384';
+            cOjiva = '#20c997'; cOjivaBg = 'rgba(32, 201, 151, 0.2)'; cParetoBar = 'rgba(255, 193, 7, 0.6)'; cParetoLine = '#adb5bd';
+        }
+
+        const ctx1 = document.getElementById('histogramaCanvas').getContext('2d');
+        chartHistograma = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: etiquetas,
+                datasets: [
+                    { label: 'fi (Histograma)', data: fiArray, backgroundColor: cHistBg, borderColor: cHistBorder, borderWidth: 1 },
+                    { label: 'Polígono', data: fiArray, type: 'line', borderColor: cPoligono, backgroundColor: cPoligono, tension: 0.1, fill: false, borderWidth: 3, pointRadius: 5, pointBackgroundColor: (temaActual==='neon'?'#fff':cPoligono) }
+                ]
+            }
+        });
+
+        const ctx2 = document.getElementById('ojivaCanvas').getContext('2d');
+        chartOjiva = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: etiquetas,
+                datasets: [{ label: 'Fi (Ojiva)', data: FiArray, borderColor: cOjiva, backgroundColor: cOjivaBg, fill: true, tension: 0.1, borderWidth: 3, pointRadius: 5, pointBackgroundColor: (temaActual==='neon'?'#fff':cOjiva) }]
+            }
+        });
+
+        let paretoData = etiquetas.map((label, i) => ({ label, fi: fiArray[i] })).sort((a, b) => b.fi - a.fi);
+        let pLabels = paretoData.map(d => d.label);
+        let pFi = paretoData.map(d => d.fi);
+        let pFiAcum = [];
+        let sum = 0, total = pFi.reduce((a, b) => a + b, 0);
+        pFi.forEach(val => { sum += val; pFiAcum.push((sum / total) * 100); });
+
+        const ctx3 = document.getElementById('paretoCanvas').getContext('2d');
+        chartPareto = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: pLabels,
+                datasets: [
+                    { label: 'Frecuencia', data: pFi, backgroundColor: cParetoBar, yAxisID: 'y' },
+                    { label: '% Acumulado', data: pFiAcum, type: 'line', borderColor: cParetoLine, borderWidth: 3, yAxisID: 'y1' }
+                ]
+            },
+            options: { scales: { y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', max: 100 } } }
+        });
+    }
+
+    // --- SECCIÓN 4: CONJUNTOS Y COMBINATORIA ---
+    function operarConjuntos() {
+        let a = new Set(document.getElementById('conjuntoA').value.split(',').map(x => x.trim()).filter(x => x));
+        let b = new Set(document.getElementById('conjuntoB').value.split(',').map(x => x.trim()).filter(x => x));
+        let union = new Set([...a, ...b]);
+        let interseccion = new Set([...a].filter(x => b.has(x)));
+        document.getElementById('unionRes').innerText = `{ ${[...union].join(', ')} }`;
+        document.getElementById('interRes').innerText = `{ ${[...interseccion].join(', ')} }`;
+    }
+
+    function factorial(n) {
+        if (n === 0 || n === 1) return 1;
+        for (let i = n - 1; i >= 1; i--) n *= i;
+        return n;
+    }
+
+    function calcularCombinatoria() {
+        let n = parseInt(document.getElementById('val_n').value);
+        let r = parseInt(document.getElementById('val_r').value);
+        if(isNaN(n) || isNaN(r) || n < r || n < 0 || r < 0) {
+            alert("Error: n y r deben ser positivos y n >= r.");
+            return;
+        }
+        document.getElementById('resPerm').innerText = factorial(n) / factorial(n - r);
+        document.getElementById('resComb').innerText = factorial(n) / (factorial(r) * factorial(n - r));
+    }
+
+    // --- SECCIÓN 5: PROBABILIDAD Y ÁRBOL DINÁMICO ---
+    function calcularArbol() {
+        let pE = parseFloat(document.getElementById('probExito').value);
+        if (isNaN(pE) || pE < 0 || pE > 1) return alert("Ingresa una probabilidad válida (Ej: 0.5).");
+
+        let pF = 1 - pE;
+        document.getElementById('resPF').innerText = pF.toFixed(4);
+        document.getElementById('resEE').innerText = (pE * pE).toFixed(4);
+        document.getElementById('resEF').innerText = (pE * pF).toFixed(4);
+        document.getElementById('resFE').innerText = (pF * pE).toFixed(4);
+        document.getElementById('resFF').innerText = (pF * pF).toFixed(4);
+
+        dibujarArbolCanvasTema(pE, pF, pE * pE, pE * pF, pF * pE, pF * pF);
+    }
+
+    function dibujarArbolCanvasTema(pE, pF, pEE, pEF, pFE, pFF) {
+        const canvas = document.getElementById('arbolCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Colores según el tema
+        let colorExito, colorFracaso, colorTexto, colorFondoNodos, colorResultado;
+        if (temaActual === 'neon') {
+            colorExito = "#0ff"; colorFracaso = "#f0f"; colorTexto = "#fff"; colorFondoNodos = "#111"; colorResultado = "#ccff00";
+        } else if (temaActual === 'light') {
+            colorExito = "#0d6efd"; colorFracaso = "#dc3545"; colorTexto = "#212529"; colorFondoNodos = "#fff"; colorResultado = "#198754";
+        } else { 
+            colorExito = "#0dcaf0"; colorFracaso = "#d63384"; colorTexto = "#f8f9fa"; colorFondoNodos = "#343a40"; colorResultado = "#20c997";
+        }
+
+        ctx.font = "bold 15px Arial"; 
+        ctx.lineWidth = 3;
+
+        function drawBranch(x1, y1, x2, y2, text, textX, textY, finalLabel, result, color) {
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); 
+            ctx.strokeStyle = color; 
+            if(temaActual === 'neon') { ctx.shadowBlur = 10; ctx.shadowColor = color; }
+            ctx.stroke();
+            ctx.shadowBlur = 0; 
+            
+            ctx.fillStyle = colorFondoNodos; ctx.fillRect(textX - 25, textY - 12, 50, 24);
+            ctx.fillStyle = colorTexto; ctx.fillText(text, textX - 20, textY + 5);
+            
+            ctx.fillStyle = color; ctx.fillText(finalLabel, x2 + 10, y2 - 5);
+            if(result !== null) { 
+                ctx.fillStyle = colorResultado; 
+                ctx.fillText(`= ${result.toFixed(4)}`, x2 + 10, y2 + 15); 
+            }
+        }
+
+        ctx.fillStyle = colorTexto;
+        ctx.fillText("INICIO", 20, 180);
+
+        // Ramas
+        drawBranch(80, 175, 250, 80, pE.toFixed(2), 160, 115, "Éxito", null, colorExito); 
+        drawBranch(80, 175, 250, 270, pF.toFixed(2), 160, 235, "Fracaso", null, colorFracaso); 
+        drawBranch(300, 80, 500, 40, pE.toFixed(2), 390, 55, "Éxito", pEE, colorExito);
+        drawBranch(300, 80, 500, 120, pF.toFixed(2), 390, 105, "Fracaso", pEF, colorFracaso);
+        drawBranch(300, 270, 500, 230, pE.toFixed(2), 390, 245, "Éxito", pFE, colorExito);
+        drawBranch(300, 270, 500, 310, pF.toFixed(2), 390, 295, "Fracaso", pFF, colorFracaso);
+    }
+</script>
+</body>
+</html>
